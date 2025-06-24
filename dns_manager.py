@@ -138,6 +138,10 @@ class DNSManager(QWidget):
 
         self.interfaces = get_interfaces()
         self.interface_box = QComboBox()
+        self.interface_box.setFont(QFont("Segoe UI", 11))
+        self.interface_box.setMinimumHeight(32)
+        self.interface_box.setStyleSheet("QComboBox { padding: 6px; }")
+
         self.interface_box.addItems(self.interfaces)
         self.interface_box.currentIndexChanged.connect(self.refresh_dns)
         layout.addWidget(QLabel("Select Network Interface:"))
@@ -192,6 +196,26 @@ class DNSManager(QWidget):
         self.tray_icon.show()
 
         self.refresh_dns()
+    def light_theme(self):
+        return """
+            QWidget { background: #f5f6fa; color: #2f3640; }
+            QPushButton {
+                background: #0097e6;
+                color: #fff;
+                border-radius: 6px;
+                padding: 6px 14px;
+                font-size: 14px;
+            }
+            QPushButton:hover { background: #00a8ff; }
+            QListWidget, QLineEdit {
+                background: #dcdde1;
+                border: 1px solid #ccc;
+                color: #2f3640;
+                padding: 4px;
+            }
+            QComboBox { padding: 4px; background: #dcdde1; color: #2f3640; }
+            QLabel { font-size: 13px; }
+        """
 
     def dark_theme(self):
         return """
@@ -215,9 +239,15 @@ class DNSManager(QWidget):
         """
 
     def toggle_theme(self):
-        self.setStyleSheet(self.dark_theme() if self.current_theme == 'light' else self.dark_theme())
-        self.theme_toggle.setText("\u2600 Light Mode" if self.current_theme == 'light' else "\ud83c\udf19 Dark Mode")
-        self.current_theme = 'dark' if self.current_theme == 'light' else 'light'
+        if self.current_theme == 'dark':
+            self.setStyleSheet(self.light_theme())
+            self.theme_toggle.setText("🌙 Dark Mode")
+            self.current_theme = 'light'
+        else:
+            self.setStyleSheet(self.dark_theme())
+            self.theme_toggle.setText("☀ Light Mode")
+            self.current_theme = 'dark'
+
 
     def selected_interface(self):
         return self.interface_box.currentText()
