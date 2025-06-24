@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QDialog, QFormLayout,
     QDialogButtonBox, QComboBox, QSystemTrayIcon, QMenu, QAction, QProgressDialog
 )
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtGui import QFont, QIcon,QMovie
 from PyQt5.QtCore import Qt, QPropertyAnimation, QTimer
 
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u"dns.manager.app")
@@ -85,7 +85,7 @@ class ProfileDialog(QDialog):
     def __init__(self, profile=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle('DNS Profile')
-        self.setFixedWidth(300)
+        self.setFixedWidth(400)
         layout = QFormLayout(self)
         self.name = QLineEdit(self)
         self.preferred = QLineEdit(self)
@@ -116,13 +116,13 @@ class ProfileDialog(QDialog):
 class DNSManager(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('DNS Manager')
+        self.setWindowTitle('DNS Manager by ⬆️ AVATAR-Devs ⬆️')
         self.setMinimumWidth(550)
         self.setWindowIcon(QIcon("icon.ico"))
 
         self.current_theme = 'dark'
         self.setStyleSheet(self.dark_theme())
-
+    
         layout = QVBoxLayout(self)
 
         header = QHBoxLayout()
@@ -138,7 +138,7 @@ class DNSManager(QWidget):
 
         self.interfaces = get_interfaces()
         self.interface_box = QComboBox()
-        self.interface_box.setFont(QFont("Segoe UI", 11))
+        self.interface_box.setFont(QFont("Segoe UI", 15))
         self.interface_box.setMinimumHeight(32)
         self.interface_box.setStyleSheet("QComboBox { padding: 6px; }")
 
@@ -148,7 +148,7 @@ class DNSManager(QWidget):
         layout.addWidget(self.interface_box)
 
         self.current_dns = QLabel()
-        self.current_dns.setFont(QFont('Consolas', 10))
+        self.current_dns.setFont(QFont('Consolas', 15))
         self.current_dns.setWordWrap(True)
         layout.addWidget(QLabel('Current DNS:'))
         layout.addWidget(self.current_dns)
@@ -183,17 +183,17 @@ class DNSManager(QWidget):
         btns2.addWidget(self.btn_set)
         layout.addLayout(btns2)
 
-        self.tray_icon = QSystemTrayIcon(QIcon("icon.ico"), self)
-        tray_menu = QMenu()
-        show_action = QAction("Show", self)
-        show_action.triggered.connect(self.showNormal)
-        tray_menu.addAction(show_action)
-        quit_action = QAction("Exit", self)
-        quit_action.triggered.connect(QApplication.quit)
-        tray_menu.addAction(quit_action)
-        self.tray_icon.setContextMenu(tray_menu)
-        self.tray_icon.setToolTip("DNS Manager")
-        self.tray_icon.show()
+        # self.tray_icon = QSystemTrayIcon(QIcon("icon.ico"), self)
+        # tray_menu = QMenu()
+        # show_action = QAction("Show", self)
+        # show_action.triggered.connect(self.showNormal)
+        # tray_menu.addAction(show_action)
+        # quit_action = QAction("Exit", self)
+        # quit_action.triggered.connect(QApplication.quit)
+        # tray_menu.addAction(quit_action)
+        # self.tray_icon.setContextMenu(tray_menu)
+        # self.tray_icon.setToolTip("DNS Manager")
+        # self.tray_icon.show()
 
         self.refresh_dns()
     def light_theme(self):
@@ -204,7 +204,7 @@ class DNSManager(QWidget):
                 color: #fff;
                 border-radius: 6px;
                 padding: 6px 14px;
-                font-size: 14px;
+                font-size: 18px;
             }
             QPushButton:hover { background: #00a8ff; }
             QListWidget, QLineEdit {
@@ -214,7 +214,7 @@ class DNSManager(QWidget):
                 padding: 4px;
             }
             QComboBox { padding: 4px; background: #dcdde1; color: #2f3640; }
-            QLabel { font-size: 13px; }
+            QLabel { font-size: 18px; }
         """
 
     def dark_theme(self):
@@ -225,7 +225,7 @@ class DNSManager(QWidget):
                 color: #fff;
                 border-radius: 6px;
                 padding: 6px 14px;
-                font-size: 14px;
+                font-size: 18px;
             }
             QPushButton:hover { background: #0097e6; }
             QListWidget, QLineEdit {
@@ -235,7 +235,7 @@ class DNSManager(QWidget):
                 padding: 4px;
             }
             QComboBox { padding: 4px; background: #353b48; color: #f5f6fa; }
-            QLabel { font-size: 13px; }
+            QLabel { font-size: 18px; }
         """
 
     def toggle_theme(self):
@@ -265,17 +265,26 @@ class DNSManager(QWidget):
         self.anim.start()
 
     def show_loading(self, message="Please wait..."):
-        dialog = QProgressDialog(message, None, 0, 0, self)
+        dialog = QDialog(self)
         dialog.setWindowTitle("Working...")
         dialog.setWindowModality(Qt.ApplicationModal)
-        dialog.setCancelButton(None)
-        dialog.setMinimumDuration(0)
+        dialog.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint)
+        dialog.setFixedSize(300, 100)
+
+        layout = QVBoxLayout(dialog)
+        layout.setAlignment(Qt.AlignCenter)
+
+        label = QLabel(message)
+        label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(label)
+
         dialog.show()
+        QApplication.processEvents()  # Ensure it's rendered before any blocking
         return dialog
 
     def clear_dns(self):
         loading = self.show_loading("Clearing DNS...")
-        QTimer.singleShot(100, lambda: self._clear_dns(loading))
+        self._clear_dns(loading)
 
     def _clear_dns(self, loading):
         result = clear_dns(self.selected_interface())
@@ -327,7 +336,7 @@ class DNSManager(QWidget):
             QMessageBox.warning(self, 'Error', 'Select a profile to set.')
             return
         loading = self.show_loading("Setting DNS profile...")
-        QTimer.singleShot(100, lambda: self._set_dns_profile(row, loading))
+        self._set_dns_profile(row, loading)
 
     def _set_dns_profile(self, row, loading):
         result = set_dns(self.profiles[row], self.selected_interface())
@@ -357,6 +366,7 @@ def is_admin():
 def main():
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("icon.ico"))
+    app.setFont(QFont('Segoe UI', 15))
     win = DNSManager()
     win.show()
     sys.exit(app.exec_())

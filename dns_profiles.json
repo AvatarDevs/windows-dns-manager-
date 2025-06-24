@@ -3,5 +3,10 @@
     "name": "electro",
     "preferred": "78.157.42.101",
     "alternate": "78.157.42.100"
+  },
+  {
+    "name": "shecan",
+    "preferred": "185.51.200.2",
+    "alternate": "178.22.122.100"
   }
 ]
